@@ -15,7 +15,7 @@
 
 ## Скачать
 
-**[⬇ Скачать planner.apk](https://github.com/Ivanopulo124/mobile_notebook/raw/main/dist/planner.apk)** · версия 0.1.0 · 2,1 МБ · Android 8.0 и новее
+**[⬇ Скачать planner.apk](https://github.com/Ivanopulo124/mobile_notebook/raw/main/dist/planner.apk)** · версия 0.1.1 · 2,1 МБ · Android 8.0 и новее
 
 1. Откройте ссылку на телефоне и скачайте файл.
 2. Откройте скачанный `planner.apk`. Если Android спросит, разрешите браузеру или файловому менеджеру устанавливать неизвестные приложения.
@@ -26,10 +26,10 @@
 <details>
 <summary>Проверить файл</summary>
 
-SHA-256 файла `planner.apk` 0.1.0:
+SHA-256 файла `planner.apk` 0.1.1:
 
 ```
-264af4728ae8e087294e4cda38dd916c2e51fe5c8f87c28872cf96c7ee98bcfb
+3893b4b0570e45df402f57187b56fc717a1efdbab02eeb35112347a9bc08ff60
 ```
 
 </details>

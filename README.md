@@ -15,7 +15,7 @@ A paper-style weekly planner for Android. One screen is one week: swipe left or 
 
 ## Download
 
-**[⬇ Download planner.apk](https://github.com/Ivanopulo124/mobile_notebook/raw/main/dist/planner.apk)** · version 0.1.0 · 2.1 MB · Android 8.0 or newer
+**[⬇ Download planner.apk](https://github.com/Ivanopulo124/mobile_notebook/raw/main/dist/planner.apk)** · version 0.1.1 · 2.1 MB · Android 8.0 or newer
 
 1. Open the link on your phone and download the file.
 2. Open the downloaded `planner.apk`. If Android asks, allow your browser or file manager to install unknown apps.
@@ -26,10 +26,10 @@ New versions install over the old one and keep your tasks. Google Drive sync in 
 <details>
 <summary>Verify the download</summary>
 
-SHA-256 of `planner.apk` 0.1.0:
+SHA-256 of `planner.apk` 0.1.1:
 
 ```
-264af4728ae8e087294e4cda38dd916c2e51fe5c8f87c28872cf96c7ee98bcfb
+3893b4b0570e45df402f57187b56fc717a1efdbab02eeb35112347a9bc08ff60
 ```
 
 </details>
