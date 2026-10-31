@@ -7,4 +7,5 @@ local.properties
 .DS_Store
 captures/
 *.apk
+!dist/planner.apk
 *.aab

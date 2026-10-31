@@ -13,6 +13,27 @@
   <img src="docs/screenshots/ru/tablet.png" width="420" alt="Планшет">
 </p>
 
+## Скачать
+
+**[⬇ Скачать planner.apk](https://github.com/Ivanopulo124/mobile_notebook/raw/main/dist/planner.apk)** · версия 0.1.0 · 2,1 МБ · Android 8.0 и новее
+
+1. Откройте ссылку на телефоне и скачайте файл.
+2. Откройте скачанный `planner.apk`. Если Android спросит, разрешите браузеру или файловому менеджеру устанавливать неизвестные приложения.
+3. Если Google Play Защита предупредит о неизвестном приложении, выберите **Всё равно установить**. Приложения нет в Google Play, поэтому Play Защита его пока не знает.
+
+Новые версии устанавливаются поверх старой и сохраняют задачи. Синхронизация с Google Drive в этой сборке работает только для Google-аккаунтов, одобренных как тестировщики, пока вход через Google у приложения находится в режиме тестирования; всё остальное работает и без неё.
+
+<details>
+<summary>Проверить файл</summary>
+
+SHA-256 файла `planner.apk` 0.1.0:
+
+```
+264af4728ae8e087294e4cda38dd916c2e51fe5c8f87c28872cf96c7ee98bcfb
+```
+
+</details>
+
 ## Возможности
 
 - **Неделя на экране.** Недели листаются свайпом, круглая кнопка с календарём возвращает к текущей неделе. Сегодняшний день выделен.
@@ -34,6 +55,17 @@
 ```
 
 Приложение нацелено на Android 16 (API 36) и работает на Android 8.0 (API 26) и новее.
+
+`./gradlew :app:assembleRelease` собирает сжатый release-APK. Он подписывается, если заданы эти свойства, например в `~/.gradle/gradle.properties` (никогда не в репозитории); без них release-APK собирается неподписанным:
+
+```properties
+PLANNER_RELEASE_STORE_FILE=/path/to/release.jks
+PLANNER_RELEASE_STORE_PASSWORD=...
+PLANNER_RELEASE_KEY_ALIAS=...
+PLANNER_RELEASE_KEY_PASSWORD=...
+```
+
+Чтобы выпустить новую версию, увеличьте `versionCode` и `versionName` в `app/build.gradle.kts`, соберите release, скопируйте его в `dist/planner.apk` и обновите версию и контрольную сумму в обоих README.
 
 ## Настройка синхронизации с Google Drive
 

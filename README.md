@@ -13,6 +13,27 @@ A paper-style weekly planner for Android. One screen is one week: swipe left or 
   <img src="docs/screenshots/en/tablet.png" width="420" alt="Tablet layout">
 </p>
 
+## Download
+
+**[⬇ Download planner.apk](https://github.com/Ivanopulo124/mobile_notebook/raw/main/dist/planner.apk)** · version 0.1.0 · 2.1 MB · Android 8.0 or newer
+
+1. Open the link on your phone and download the file.
+2. Open the downloaded `planner.apk`. If Android asks, allow your browser or file manager to install unknown apps.
+3. If Google Play Protect warns about an unknown app, choose **Install anyway**. The app is not on Google Play, so Play Protect does not know it yet.
+
+New versions install over the old one and keep your tasks. Google Drive sync in this build only works for Google accounts approved as testers while the app's Google sign-in is in testing; everything else works without it.
+
+<details>
+<summary>Verify the download</summary>
+
+SHA-256 of `planner.apk` 0.1.0:
+
+```
+264af4728ae8e087294e4cda38dd916c2e51fe5c8f87c28872cf96c7ee98bcfb
+```
+
+</details>
+
 ## Features
 
 - **One week per screen.** Swipe to change weeks; the round calendar button jumps back to the current week. Today's day is highlighted.
@@ -34,6 +55,17 @@ Requirements: Android SDK with platform 37 (Android Gradle Plugin downloads it a
 ```
 
 The app targets Android 16 (API 36) and runs on Android 8.0 (API 26) and newer.
+
+`./gradlew :app:assembleRelease` builds a shrunk release APK. It is signed when these properties are set, for example in `~/.gradle/gradle.properties` (never in the repository); without them the release APK is built unsigned:
+
+```properties
+PLANNER_RELEASE_STORE_FILE=/path/to/release.jks
+PLANNER_RELEASE_STORE_PASSWORD=...
+PLANNER_RELEASE_KEY_ALIAS=...
+PLANNER_RELEASE_KEY_PASSWORD=...
+```
+
+To publish a new version, raise `versionCode` and `versionName` in `app/build.gradle.kts`, build the release, copy it to `dist/planner.apk` and update the version and checksum in both READMEs.
 
 ## Google Drive sync setup
 
