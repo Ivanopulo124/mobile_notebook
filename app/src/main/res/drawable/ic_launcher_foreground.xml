@@ -3,20 +3,22 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- "LIST" drawn as monospace glyphs: four 9-unit cells with 3-unit gaps, centred in the safe zone. -->
     <path
         android:strokeColor="#FFFFFF"
-        android:strokeWidth="3"
+        android:strokeWidth="2.6"
+        android:pathData="M32.8,47V59.7H40.5" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.6"
+        android:pathData="M44.5,48.3H51.5M48,48.3V59.7M44.5,59.7H51.5" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.6"
         android:strokeLineCap="round"
-        android:pathData="M40,44H70M40,54H70M40,64H70" />
+        android:pathData="M63.2,50.3C62.6,48.9 61.4,48.3 60,48.3C58.2,48.3 56.8,49.4 56.8,51.1C56.8,52.9 58.4,53.5 60,54C61.6,54.5 63.2,55.1 63.2,56.9C63.2,58.6 61.8,59.7 60,59.7C58.6,59.7 57.4,59.1 56.8,57.7" />
     <path
         android:strokeColor="#FFFFFF"
-        android:strokeWidth="2.5"
-        android:pathData="M34,41.5h5v5h-5z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M33,52h7v7h-7z" />
-    <path
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="2.5"
-        android:pathData="M34,61.5h5v5h-5z" />
+        android:strokeWidth="2.6"
+        android:pathData="M67.5,48.3H76.5M72,48.3V61" />
 </vector>

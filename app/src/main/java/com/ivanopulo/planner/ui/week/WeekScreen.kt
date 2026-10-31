@@ -105,6 +105,7 @@ fun WeekScreen(
                         tasksByDay = tasks,
                         someday = someday,
                         editing = editing,
+                        isCurrentPage = page == pagerState.currentPage,
                         actions = viewModel,
                     )
                 }
@@ -137,6 +138,7 @@ private fun WeekPage(
     tasksByDay: Map<LocalDate, List<Task>>,
     someday: List<Task>,
     editing: EditTarget?,
+    isCurrentPage: Boolean,
     actions: TaskActions,
 ) {
     val focusManager = LocalFocusManager.current
@@ -172,7 +174,9 @@ private fun WeekPage(
                         Cell.Someday -> SomedayBlock(
                             tasks = someday,
                             lineCount = lines,
-                            editing = editing,
+                            // Every composed page shows the same list; an editor on an off-screen
+                            // page would steal focus from the visible one and close it.
+                            editing = editing.takeIf { isCurrentPage },
                             actions = actions,
                             modifier = modifier,
                         )
