@@ -28,4 +28,20 @@
     <string name="theme_system">System default</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
+    <string name="settings_sync">Sync</string>
+    <string name="sync_sign_in">Sign in with Google</string>
+    <string name="sync_signing_in">Signing in…</string>
+    <string name="sync_sign_in_hint">Tasks are kept in a hidden app folder on your Google Drive. The app cannot see your other files.</string>
+    <string name="sync_account">Account</string>
+    <string name="sync_last">Last sync</string>
+    <string name="sync_never">Not yet</string>
+    <string name="sync_running">Syncing…</string>
+    <string name="sync_now">Sync now</string>
+    <string name="sync_sign_out">Sign out</string>
+    <string name="sync_error_auth">Google Drive access was lost. Sign out and sign in again.</string>
+    <string name="sync_error_network">No connection to Google Drive. Will retry automatically.</string>
+    <string name="sync_error_format">The sync file was written by a newer app version or is damaged. Update the app.</string>
+    <string name="sync_error_other">Sync failed. Will try again later.</string>
+    <string name="sign_in_error_configuration">Google sign-in is not configured for this build (OAuth client, package name or SHA-1).</string>
+    <string name="sign_in_error_failed">Could not sign in to Google. Try again.</string>
 </resources>

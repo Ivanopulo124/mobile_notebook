@@ -19,6 +19,8 @@ class FakeTaskDao : TaskDao {
         map.values.filter { !it.deleted && it.date == null }.sortedBy { it.position }
     }
 
+    override suspend fun getAll(): List<TaskEntity> = rows.value.values.toList()
+
     override suspend fun get(id: String): TaskEntity? = rows.value[id]
 
     override suspend fun nextPosition(date: String?): Int =

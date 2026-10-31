@@ -28,4 +28,20 @@
     <string name="theme_system">Как в системе</string>
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Тёмная</string>
+    <string name="settings_sync">Синхронизация</string>
+    <string name="sync_sign_in">Войти через Google</string>
+    <string name="sync_signing_in">Вход…</string>
+    <string name="sync_sign_in_hint">Задачи хранятся в скрытой папке приложения на вашем Google Drive. Другие файлы приложению недоступны.</string>
+    <string name="sync_account">Аккаунт</string>
+    <string name="sync_last">Последняя синхронизация</string>
+    <string name="sync_never">Ещё не было</string>
+    <string name="sync_running">Синхронизация…</string>
+    <string name="sync_now">Синхронизировать сейчас</string>
+    <string name="sync_sign_out">Выйти</string>
+    <string name="sync_error_auth">Доступ к Google Drive потерян. Выйдите и войдите снова.</string>
+    <string name="sync_error_network">Нет связи с Google Drive. Повторим автоматически.</string>
+    <string name="sync_error_format">Файл синхронизации создан более новой версией приложения или повреждён. Обновите приложение.</string>
+    <string name="sync_error_other">Не удалось синхронизировать. Попробуем позже.</string>
+    <string name="sign_in_error_configuration">Вход через Google не настроен для этой сборки (OAuth-клиент, имя пакета или SHA-1).</string>
+    <string name="sign_in_error_failed">Не удалось войти в Google. Попробуйте ещё раз.</string>
 </resources>

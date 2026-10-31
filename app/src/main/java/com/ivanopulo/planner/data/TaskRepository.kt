@@ -11,6 +11,7 @@ class TaskRepository(
     private val dao: TaskDao,
     private val clock: () -> Long = System::currentTimeMillis,
     private val newId: () -> String = { UUID.randomUUID().toString() },
+    private val onLocalChange: () -> Unit = {},
 ) {
     fun observeWeek(monday: LocalDate): Flow<Map<LocalDate, List<Task>>> =
         dao.observeRange(monday.toString(), monday.plusDays(6).toString())
@@ -33,6 +34,7 @@ class TaskRepository(
                 deleted = false,
             )
         )
+        onLocalChange()
     }
 
     suspend fun rename(id: String, title: String) = update(id) { copy(title = title) }
@@ -46,6 +48,7 @@ class TaskRepository(
         val current = dao.get(id) ?: return
         if (current.date == key) return
         dao.upsert(current.copy(date = key, position = dao.nextPosition(key), updatedAt = clock()))
+        onLocalChange()
     }
 
     suspend fun delete(id: String) = update(id) { copy(deleted = true) }
@@ -55,7 +58,9 @@ class TaskRepository(
     private suspend fun update(id: String, change: TaskEntity.() -> TaskEntity) {
         val current = dao.get(id) ?: return
         val changed = current.change()
-        if (changed != current) dao.upsert(changed.copy(updatedAt = clock()))
+        if (changed == current) return
+        dao.upsert(changed.copy(updatedAt = clock()))
+        onLocalChange()
     }
 
     private fun TaskEntity.toTask() = Task(
