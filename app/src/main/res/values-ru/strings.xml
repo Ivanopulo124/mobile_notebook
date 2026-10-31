@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ежедневник</string>
+    <string name="week_number">№%1$d</string>
+    <string name="cd_previous_week">Предыдущая неделя</string>
+    <string name="cd_next_week">Следующая неделя</string>
+    <string name="cd_today">К текущей неделе</string>
+    <string name="cd_theme_system">Тема: как в системе</string>
+    <string name="cd_theme_light">Тема: светлая</string>
+    <string name="cd_theme_dark">Тема: тёмная</string>
+</resources>

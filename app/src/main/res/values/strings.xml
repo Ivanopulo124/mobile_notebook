@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Planner</string>
+    <string name="week_number">W%1$d</string>
+    <string name="cd_previous_week">Previous week</string>
+    <string name="cd_next_week">Next week</string>
+    <string name="cd_today">Go to current week</string>
+    <string name="cd_theme_system">Theme: system</string>
+    <string name="cd_theme_light">Theme: light</string>
+    <string name="cd_theme_dark">Theme: dark</string>
+</resources>
