@@ -7,4 +7,5 @@ data class Task(
     val date: LocalDate?,
     val title: String,
     val done: Boolean,
+    val color: TaskColor? = null,
 )

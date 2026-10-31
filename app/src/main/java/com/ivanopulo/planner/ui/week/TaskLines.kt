@@ -1,14 +1,16 @@
 package com.ivanopulo.planner.ui.week
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -25,7 +27,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -37,7 +38,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
@@ -47,37 +50,53 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ivanopulo.planner.domain.Task
+import com.ivanopulo.planner.ui.components.ruledLine
+import com.ivanopulo.planner.ui.theme.HighlightText
+import com.ivanopulo.planner.ui.theme.highlightColor
 
-private val LineMinHeight = 48.dp
 private val LineTextPadding = Modifier.padding(top = 12.dp, bottom = 12.dp, end = 8.dp)
 
 @Composable
-fun Modifier.ruledLine(): Modifier {
-    val color = MaterialTheme.colorScheme.outlineVariant
-    return fillMaxWidth()
-        .heightIn(min = LineMinHeight)
-        .drawBehind {
-            val y = size.height - 0.5.dp.toPx()
-            drawLine(color, Offset(0f, y), Offset(size.width, y), strokeWidth = 1.dp.toPx())
-        }
-}
-
-@Composable
-fun TaskLine(task: Task, onToggle: () -> Unit, onClick: () -> Unit) {
+fun TaskLine(task: Task, onToggle: () -> Unit, onClick: () -> Unit, onLongClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
+    val haptics = LocalHapticFeedback.current
+    val highlight = task.color?.let(::highlightColor)
     Row(
-        modifier = Modifier.ruledLine().clickable(onClick = onClick),
+        modifier = Modifier.ruledLine().combinedClickable(
+            onClick = onClick,
+            onLongClick = {
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                onLongClick()
+            },
+        ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TaskCheckbox(checked = task.done, onToggle = onToggle)
         Text(
             text = task.title,
             style = MaterialTheme.typography.bodyLarge,
-            color = if (task.done) colors.onSurfaceVariant else colors.onBackground,
+            color = when {
+                task.done -> colors.onSurfaceVariant
+                highlight != null -> HighlightText
+                else -> colors.onBackground
+            },
             textDecoration = if (task.done) TextDecoration.LineThrough else null,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = LineTextPadding,
+            modifier = if (highlight == null) {
+                LineTextPadding
+            } else {
+                // The pill's own padding replaces part of the line padding to keep the row height,
+                // and the offset keeps highlighted text aligned with plain text.
+                Modifier
+                    .padding(top = 10.dp, bottom = 10.dp, end = 8.dp)
+                    .offset(x = (-8).dp)
+                    .background(
+                        highlight.copy(alpha = if (task.done) 0.35f else 1f),
+                        RoundedCornerShape(12.dp),
+                    )
+                    .padding(horizontal = 8.dp, vertical = 2.dp)
+            },
         )
     }
 }

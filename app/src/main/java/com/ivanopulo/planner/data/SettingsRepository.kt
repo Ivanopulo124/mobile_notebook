@@ -8,9 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 enum class ThemeMode {
-    SYSTEM, LIGHT, DARK;
-
-    fun next(): ThemeMode = entries[(ordinal + 1) % entries.size]
+    SYSTEM, LIGHT, DARK
 }
 
 class SettingsRepository(private val dataStore: DataStore<Preferences>) {

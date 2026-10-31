@@ -29,7 +29,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ivanopulo.planner.R
-import com.ivanopulo.planner.data.ThemeMode
 import com.ivanopulo.planner.domain.Weeks
 import java.time.LocalDate
 
@@ -37,11 +36,10 @@ import java.time.LocalDate
 fun WeekHeader(
     monday: LocalDate,
     showToday: Boolean,
-    themeMode: ThemeMode,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
     onToday: () -> Unit,
-    onThemeClick: () -> Unit,
+    onSettings: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
     val title = monthTitle(monday, currentLocale())
@@ -80,11 +78,11 @@ fun WeekHeader(
                 )
             }
             RoundIconButton(
-                icon = themeMode.icon(),
-                contentDescription = stringResource(themeMode.label()),
+                icon = R.drawable.ic_settings,
+                contentDescription = stringResource(R.string.cd_settings),
                 container = colors.surfaceVariant,
                 content = colors.onBackground,
-                onClick = onThemeClick,
+                onClick = onSettings,
             )
             RoundIconButton(
                 icon = R.drawable.ic_chevron_left,
@@ -127,16 +125,4 @@ private fun RoundIconButton(
             modifier = Modifier.size(22.dp),
         )
     }
-}
-
-private fun ThemeMode.icon() = when (this) {
-    ThemeMode.SYSTEM -> R.drawable.ic_theme_auto
-    ThemeMode.LIGHT -> R.drawable.ic_theme_light
-    ThemeMode.DARK -> R.drawable.ic_theme_dark
-}
-
-private fun ThemeMode.label() = when (this) {
-    ThemeMode.SYSTEM -> R.string.cd_theme_system
-    ThemeMode.LIGHT -> R.string.cd_theme_light
-    ThemeMode.DARK -> R.string.cd_theme_dark
 }

@@ -6,14 +6,25 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.ivanopulo.planner.data.ThemeMode
+import com.ivanopulo.planner.ui.settings.SettingsScreen
 import com.ivanopulo.planner.ui.theme.PlannerTheme
 import com.ivanopulo.planner.ui.week.WeekScreen
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
@@ -35,7 +46,34 @@ class MainActivity : ComponentActivity() {
                 enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
                 onDispose {}
             }
-            PlannerTheme(darkTheme) { WeekScreen() }
+            PlannerTheme(darkTheme) {
+                var showSettings by rememberSaveable { mutableStateOf(false) }
+                // Keeps the week pager position while the settings screen is shown.
+                val stateHolder = rememberSaveableStateHolder()
+                AnimatedContent(
+                    targetState = showSettings,
+                    transitionSpec = {
+                        if (targetState) {
+                            slideInHorizontally { it } togetherWith slideOutHorizontally { -it / 3 }
+                        } else {
+                            slideInHorizontally { -it / 3 } togetherWith slideOutHorizontally { it }
+                        }
+                    },
+                    label = "screen",
+                ) { settingsVisible ->
+                    if (settingsVisible) {
+                        SettingsScreen(
+                            themeMode = mode,
+                            onThemeModeChange = { lifecycleScope.launch { settings.setThemeMode(it) } },
+                            onBack = { showSettings = false },
+                        )
+                    } else {
+                        stateHolder.SaveableStateProvider("week") {
+                            WeekScreen(onOpenSettings = { showSettings = true })
+                        }
+                    }
+                }
+            }
         }
     }
 }
