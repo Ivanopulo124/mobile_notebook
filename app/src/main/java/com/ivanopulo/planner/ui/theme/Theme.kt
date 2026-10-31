@@ -10,6 +10,7 @@ import com.ivanopulo.planner.domain.TaskColor
 private val LightColors = lightColorScheme(
     primary = Color(0xFF5B5FE8),
     onPrimary = Color.White,
+    primaryContainer = Color(0xFFF0F0FD),
     background = Color.White,
     onBackground = Color(0xFF111111),
     surface = Color.White,
@@ -31,6 +32,7 @@ private val LightColors = lightColorScheme(
 private val DarkColors = darkColorScheme(
     primary = Color(0xFF9497FF),
     onPrimary = Color(0xFF111111),
+    primaryContainer = Color(0xFF1D1E33),
     background = Color(0xFF121212),
     onBackground = Color(0xFFEDEDED),
     surface = Color(0xFF121212),

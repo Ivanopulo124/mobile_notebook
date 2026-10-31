@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Planner</string>
-    <string name="week_number">W%1$d</string>
-    <string name="cd_previous_week">Previous week</string>
-    <string name="cd_next_week">Next week</string>
     <string name="cd_today">Go to current week</string>
     <string name="cd_settings">Settings</string>
     <string name="cd_back">Back</string>
-    <string name="someday">Someday</string>
+    <string name="someday">Other</string>
     <string name="menu_next_day">Move to next day</string>
     <string name="menu_schedule_today">Schedule for today</string>
     <string name="menu_move_to_date">Move to date…</string>
-    <string name="menu_move_to_someday">Move to Someday</string>
+    <string name="menu_move_to_someday">Move to Other</string>
     <string name="menu_delete">Delete</string>
     <string name="task_deleted">Task deleted</string>
     <string name="undo">Undo</string>

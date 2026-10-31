@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ежедневник</string>
-    <string name="week_number">№%1$d</string>
-    <string name="cd_previous_week">Предыдущая неделя</string>
-    <string name="cd_next_week">Следующая неделя</string>
     <string name="cd_today">К текущей неделе</string>
     <string name="cd_settings">Настройки</string>
     <string name="cd_back">Назад</string>
-    <string name="someday">Когда-нибудь</string>
+    <string name="someday">Прочее</string>
     <string name="menu_next_day">Перенести на следующий день</string>
     <string name="menu_schedule_today">Запланировать на сегодня</string>
     <string name="menu_move_to_date">Перенести на дату…</string>
-    <string name="menu_move_to_someday">Перенести в «Когда-нибудь»</string>
+    <string name="menu_move_to_someday">Перенести в «Прочее»</string>
     <string name="menu_delete">Удалить</string>
     <string name="task_deleted">Задача удалена</string>
     <string name="undo">Отменить</string>

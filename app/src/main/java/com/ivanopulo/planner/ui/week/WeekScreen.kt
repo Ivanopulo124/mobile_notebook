@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -90,8 +89,6 @@ fun WeekScreen(
             WeekHeader(
                 monday = visibleMonday,
                 showToday = pagerState.currentPage != todayPage,
-                onPrevious = { scope.launch { pagerState.scrollBy(-1) } },
-                onNext = { scope.launch { pagerState.scrollBy(1) } },
                 onToday = { scope.launch { pagerState.animateScrollToPage(todayPage) } },
                 onSettings = onOpenSettings,
             )
@@ -125,10 +122,6 @@ fun WeekScreen(
             onDismiss = viewModel::dismissDatePicker,
         )
     }
-}
-
-private suspend fun PagerState.scrollBy(pages: Int) {
-    animateScrollToPage((currentPage + pages).coerceIn(0, pageCount - 1))
 }
 
 private sealed interface Cell {

@@ -7,8 +7,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.ivanopulo.planner.R
 import com.ivanopulo.planner.domain.Task
 import com.ivanopulo.planner.ui.components.BlockHeader
@@ -27,7 +33,8 @@ fun DayBlock(
     val colors = MaterialTheme.colorScheme
     val locale = currentLocale()
     val accent = if (isToday) colors.primary else colors.onBackground
-    TaskBlock(date, tasks, lineCount, editing, actions, modifier) {
+    val blockModifier = if (isToday) modifier.todayTint(colors.primaryContainer) else modifier
+    TaskBlock(date, tasks, lineCount, editing, actions, blockModifier) {
         BlockHeader(accent) {
             Text(
                 text = date.dayLabel(locale),
@@ -63,6 +70,18 @@ fun SomedayBlock(
             )
         }
     }
+}
+
+// Drawn slightly outside the block so today's text stays aligned with the other days.
+private fun Modifier.todayTint(color: Color) = drawBehind {
+    val inset = 10.dp.toPx()
+    val top = 12.dp.toPx()
+    drawRoundRect(
+        color = color,
+        topLeft = Offset(-inset, top),
+        size = Size(size.width + 2 * inset, size.height - top + 8.dp.toPx()),
+        cornerRadius = CornerRadius(16.dp.toPx()),
+    )
 }
 
 @Composable

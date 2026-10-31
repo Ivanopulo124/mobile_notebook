@@ -31,13 +31,6 @@ class WeeksTest {
     }
 
     @Test
-    fun isoWeekNumberMatchesCalendar() {
-        assertEquals(44, Weeks.isoWeekNumber(anchor))
-        assertEquals(53, Weeks.isoWeekNumber(LocalDate.of(2026, 12, 28)))
-        assertEquals(1, Weeks.isoWeekNumber(LocalDate.of(2027, 1, 4)))
-    }
-
-    @Test
     fun weekSpanningMonthsBelongsToMonthOfThursday() {
         assertEquals(10, Weeks.representativeDay(anchor).monthValue)
         assertEquals(12, Weeks.representativeDay(LocalDate.of(2026, 11, 30)).monthValue)

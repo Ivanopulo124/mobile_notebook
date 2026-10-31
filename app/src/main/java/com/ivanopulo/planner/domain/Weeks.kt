@@ -4,7 +4,6 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
-import java.time.temporal.WeekFields
 
 object Weeks {
     const val PAGE_COUNT = 10_000
@@ -20,8 +19,6 @@ object Weeks {
         ANCHOR_PAGE + ChronoUnit.WEEKS.between(anchorMonday, mondayOf(date)).toInt()
 
     fun daysOf(monday: LocalDate): List<LocalDate> = (0L..6L).map(monday::plusDays)
-
-    fun isoWeekNumber(monday: LocalDate): Int = monday.get(WeekFields.ISO.weekOfWeekBasedYear())
 
     // ISO 8601: a week belongs to the month (and year) that contains its Thursday.
     fun representativeDay(monday: LocalDate): LocalDate = monday.plusDays(3)

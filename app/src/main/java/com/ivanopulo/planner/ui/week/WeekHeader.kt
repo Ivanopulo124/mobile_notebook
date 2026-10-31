@@ -22,28 +22,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ivanopulo.planner.R
-import com.ivanopulo.planner.domain.Weeks
 import java.time.LocalDate
 
 @Composable
 fun WeekHeader(
     monday: LocalDate,
     showToday: Boolean,
-    onPrevious: () -> Unit,
-    onNext: () -> Unit,
     onToday: () -> Unit,
     onSettings: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
     val title = monthTitle(monday, currentLocale())
-    val weekLabel = stringResource(R.string.week_number, Weeks.isoWeekNumber(monday))
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -51,13 +44,7 @@ fun WeekHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BasicText(
-            text = buildAnnotatedString {
-                append(title)
-                append("  ")
-                withStyle(SpanStyle(color = colors.onSurfaceVariant.copy(alpha = 0.6f))) {
-                    append(weekLabel)
-                }
-            },
+            text = title,
             style = MaterialTheme.typography.headlineMedium.copy(
                 fontWeight = FontWeight.Bold,
                 color = colors.onBackground,
@@ -66,7 +53,7 @@ fun WeekHeader(
             autoSize = TextAutoSize.StepBased(minFontSize = 16.sp, maxFontSize = 30.sp),
             modifier = Modifier.weight(1f).padding(end = 8.dp),
         )
-        // "Today" comes first so that the buttons after it keep their position when it appears.
+        // "Today" comes first so that the settings button keeps its position when it appears.
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             if (showToday) {
                 RoundIconButton(
@@ -83,20 +70,6 @@ fun WeekHeader(
                 container = colors.surfaceVariant,
                 content = colors.onBackground,
                 onClick = onSettings,
-            )
-            RoundIconButton(
-                icon = R.drawable.ic_chevron_left,
-                contentDescription = stringResource(R.string.cd_previous_week),
-                container = colors.onBackground,
-                content = colors.background,
-                onClick = onPrevious,
-            )
-            RoundIconButton(
-                icon = R.drawable.ic_chevron_right,
-                contentDescription = stringResource(R.string.cd_next_week),
-                container = colors.onBackground,
-                content = colors.background,
-                onClick = onNext,
             )
         }
     }
