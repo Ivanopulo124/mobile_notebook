@@ -2,7 +2,7 @@
 
 **English** · [Русский](README.ru.md)
 
-A paper-style weekly planner for Android. One screen is one week: swipe left or right to move between weeks, tap a line to write a task, tick it off when it is done. It works fully offline and can optionally sync through a file on your Google Drive.
+A paper-style weekly planner for Android. One screen is one week: swipe left or right to move between weeks, tap a line to write a task, tick it off when it is done. It works fully offline and can optionally sync through a file on your Dropbox or Yandex Disk.
 
 <p>
   <img src="docs/screenshots/en/week.png" width="200" alt="Week view with today highlighted">
@@ -36,14 +36,14 @@ SHA-256 of `planner.apk` 0.1.1:
 
 ## Features
 
-- **One week per screen.** Swipe to change weeks; the round calendar button jumps back to the current week. Today's day is highlighted.
+- **One week per screen.** Swipe to change weeks; the round calendar button jumps back to the current week. Today's day is highlighted, and the current week scrolls to it when the app opens.
 - **Write on the lines.** Tap an empty line to add a task and press Enter to keep adding. Tap a task to edit it; clear its text to delete it.
-- **Tick tasks off.** Done tasks are greyed out and struck through.
+- **Tick tasks off.** Done tasks are greyed out and struck through. The sweep icon in a day's header deletes its done tasks at once, with undo.
 - **Other.** A list for tasks without a date, shown after Sunday.
 - **Long-press menu.** Color highlight (five colors), move to the next day, move to any date, move to Other, delete with undo.
 - **Phones and tablets.** Portrait layout with one column on phones and two on tablets.
 - **Light and dark themes.** Follows the system or can be forced in Settings.
-- **Optional Google Drive sync.** Tasks are kept in a hidden app folder on your Drive; the app cannot see your other files.
+- **Optional Dropbox or Yandex Disk sync.** Tasks are kept in the app's own folder in your cloud storage; the app cannot see your other files.
 - **English and Russian**, picked from the system language.
 
 ## Building
@@ -67,25 +67,40 @@ PLANNER_RELEASE_KEY_PASSWORD=...
 
 To publish a new version, raise `versionCode` and `versionName` in `app/build.gradle.kts`, build the release, copy it to `dist/planner.apk` and update the version and checksum in both READMEs.
 
-## Google Drive sync setup
+## Sync setup
 
-Sync is optional; without it the app works entirely offline. Google identifies Android apps by package name plus signing-key fingerprint, so there is no client ID in the code, but each build signature needs an OAuth client:
+Sync is optional; without it the app works entirely offline. Each provider needs a registered app whose public ID goes into the build through Gradle properties, for example in `~/.gradle/gradle.properties`. A build without an ID simply hides that provider.
 
-1. In [Google Cloud Console](https://console.cloud.google.com/) create a project and enable the **Google Drive API**.
-2. In **Google Auth Platform**, configure the consent screen: audience *External*, keep it in *Testing* and add your account as a test user, and add the `https://www.googleapis.com/auth/drive.appdata` scope.
-3. Create an **Android** OAuth client with package name `com.ivanopulo.planner` and the SHA-1 of the signing key. For the debug key:
+```properties
+PLANNER_DROPBOX_APP_KEY=...
+PLANNER_YANDEX_CLIENT_ID=...
+```
+
+### Dropbox
+
+1. In the [Dropbox App Console](https://www.dropbox.com/developers/apps) create an app with **Scoped access** and **App folder** access.
+2. On the **Permissions** tab enable `files.content.read`, `files.content.write` and `account_info.read`.
+3. On the **Settings** tab add the redirect URI `db-<app key>://oauth` and copy the **App key** into `PLANNER_DROPBOX_APP_KEY`. The app secret is not used.
+4. A new Dropbox app is in development status and works right away. Once it has 50 linked users, Dropbox gives two weeks to apply for production status (free) before new users are blocked.
+
+### Yandex Disk
+
+1. On [oauth.yandex.ru](https://oauth.yandex.ru/) create an app. Platform: **Android app**, package name `com.ivanopulo.planner` and the SHA-256 fingerprint of each signing key. For the debug key:
    ```bash
-   keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android | grep SHA1
+   keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android | grep SHA256
    ```
-   A release build needs a second Android client with the release key's SHA-1.
-4. In the app open **Settings → Sync → Sign in with Google**.
+2. Data access: **Yandex Disk** → *Access to the app folder on Yandex Disk* (`cloud_api:disk.app_folder`), and **Yandex ID** → *Access to email address* (`login:email`).
+3. Copy the **ClientID** into `PLANNER_YANDEX_CLIENT_ID`.
+
+Then open **Settings → Sync** in the app and sign in with either service.
 
 ### How sync works
 
-- All tasks, including deletion markers, are stored in one `planner.json` in the Drive `appDataFolder`.
+- All tasks, including deletion markers, are stored in one `planner.json` in the app folder: `Apps/<app name>` on Dropbox, `Applications/<app name>` on Yandex Disk.
 - Each task carries a last-changed timestamp; when devices disagree the newer version wins, and a sync never overwrites a task that was edited locally while the sync was running.
 - Sync runs when the app comes to the foreground, five seconds after the last edit, every 12 hours in the background and on demand, and only with a network connection.
-- Signing out keeps all tasks on the device and revokes the app's Drive access.
+- Tokens are kept in a separate file that is left out of Android backups, so a restored app asks to sign in again.
+- Signing out keeps all tasks on the device and forgets the token; for Dropbox it is also revoked.
 
 ## Architecture
 
@@ -95,7 +110,7 @@ Single-activity Kotlin app with Jetpack Compose and Material 3, no DI framework.
 | --- | --- |
 | `domain` | `Task`, `TaskColor`, week arithmetic (`Weeks`) |
 | `data` | Room database (`TaskEntity`, `TaskDao`), `TaskRepository`, DataStore settings |
-| `sync` | `SyncEngine` and `TaskMerge` (pure logic), `DriveRemoteStore` (Drive v3 REST), `GoogleAuth` (`AuthorizationClient`), `SyncManager` and `SyncWorker` (WorkManager) |
+| `sync` | `SyncEngine` and `TaskMerge` (pure logic), `DropboxAuth` (OAuth with PKCE) and `DropboxRemoteStore`, `YandexAuth` (Yandex ID SDK) and `YandexRemoteStore`, `SyncManager` and `SyncWorker` (WorkManager) |
 | `ui` | Week pager, day blocks and inline editing, task menu, settings |
 
 Weeks are pages of a `HorizontalPager` counted from the week the app was started in. Deleted tasks are soft-deleted so the deletion can reach other devices through sync.
@@ -118,4 +133,4 @@ app/src/main/java/com/ivanopulo/planner/
 ./gradlew :app:testDebugUnitTest
 ```
 
-Unit tests cover week arithmetic, the task repository (against an in-memory DAO), the merge rules, the sync file format and full sync cycles against a fake remote.
+Unit tests cover week arithmetic, the task repository (against an in-memory DAO), the merge rules, the sync file format, full sync cycles against a fake remote, PKCE, and the Dropbox and Yandex Disk stores against a fake HTTP client.

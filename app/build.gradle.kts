@@ -15,6 +15,15 @@ android {
         targetSdk = 36
         versionCode = 2
         versionName = "0.1.1"
+
+        // Public client ids, not secrets; a build without one hides that sync provider.
+        val dropboxAppKey = providers.gradleProperty("PLANNER_DROPBOX_APP_KEY").getOrElse("")
+        val yandexClientId = providers.gradleProperty("PLANNER_YANDEX_CLIENT_ID").getOrElse("")
+        buildConfigField("String", "DROPBOX_APP_KEY", "\"$dropboxAppKey\"")
+        buildConfigField("String", "YANDEX_CLIENT_ID", "\"$yandexClientId\"")
+        manifestPlaceholders["dropboxAppKey"] = dropboxAppKey
+        // The Yandex ID SDK manifest expects this exact placeholder name.
+        manifestPlaceholders["YANDEX_CLIENT_ID"] = yandexClientId
     }
 
     // The release key lives outside the repo; machines without it still build, just unsigned.
@@ -46,6 +55,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -70,8 +80,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.work.runtime.ktx)
-    implementation(libs.play.services.auth)
-    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.yandex.authsdk)
     implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)

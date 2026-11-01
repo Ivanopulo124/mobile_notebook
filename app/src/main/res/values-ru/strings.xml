@@ -11,6 +11,13 @@
     <string name="menu_move_to_someday">Перенести в «Прочее»</string>
     <string name="menu_delete">Удалить</string>
     <string name="task_deleted">Задача удалена</string>
+    <plurals name="tasks_deleted">
+        <item quantity="one">%d задача удалена</item>
+        <item quantity="few">%d задачи удалены</item>
+        <item quantity="many">%d задач удалено</item>
+        <item quantity="other">%d задачи удалено</item>
+    </plurals>
+    <string name="cd_clear_done">Удалить выполненные задачи</string>
     <string name="undo">Отменить</string>
     <string name="color_none">Без цвета</string>
     <string name="color_yellow">Жёлтый</string>
@@ -26,19 +33,23 @@
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Тёмная</string>
     <string name="settings_sync">Синхронизация</string>
-    <string name="sync_sign_in">Войти через Google</string>
+    <string name="sync_sign_in_dropbox">Войти через Dropbox</string>
+    <string name="sync_sign_in_yandex">Войти через Яндекс</string>
     <string name="sync_signing_in">Вход…</string>
-    <string name="sync_sign_in_hint">Задачи хранятся в скрытой папке приложения на вашем Google Drive. Другие файлы приложению недоступны.</string>
+    <string name="sync_sign_in_hint">Задачи хранятся в отдельной папке приложения в вашем облаке. Другие файлы приложению недоступны.</string>
+    <string name="sync_not_configured">Синхронизация не настроена в этой сборке.</string>
+    <string name="sync_service">Сервис</string>
+    <string name="provider_dropbox">Dropbox</string>
+    <string name="provider_yandex">Яндекс Диск</string>
     <string name="sync_account">Аккаунт</string>
     <string name="sync_last">Последняя синхронизация</string>
     <string name="sync_never">Ещё не было</string>
     <string name="sync_running">Синхронизация…</string>
     <string name="sync_now">Синхронизировать сейчас</string>
     <string name="sync_sign_out">Выйти</string>
-    <string name="sync_error_auth">Доступ к Google Drive потерян. Выйдите и войдите снова.</string>
-    <string name="sync_error_network">Нет связи с Google Drive. Повторим автоматически.</string>
+    <string name="sync_error_auth">Доступ к облаку потерян. Выйдите и войдите снова.</string>
+    <string name="sync_error_network">Нет связи с облаком. Повторим автоматически.</string>
     <string name="sync_error_format">Файл синхронизации создан более новой версией приложения или повреждён. Обновите приложение.</string>
     <string name="sync_error_other">Не удалось синхронизировать. Попробуем позже.</string>
-    <string name="sign_in_error_configuration">Вход через Google не настроен для этой сборки (OAuth-клиент, имя пакета или SHA-1).</string>
-    <string name="sign_in_error_failed">Не удалось войти в Google. Попробуйте ещё раз.</string>
+    <string name="sign_in_error_failed">Не удалось войти. Попробуйте ещё раз.</string>
 </resources>

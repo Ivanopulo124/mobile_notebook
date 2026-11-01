@@ -12,6 +12,7 @@ interface TaskActions {
     fun finishEdit(taskId: String, title: String)
     fun toggleDone(task: Task)
     fun openMenu(task: Task)
+    fun clearDone(date: LocalDate?)
 }
 
 interface TaskMenuActions {

@@ -79,4 +79,35 @@ class TaskRepositoryTest {
         repository.rename("t0", "renamed")
         assertEquals(2_000L, dao.all.single().updatedAt)
     }
+
+    @Test
+    fun deleteDoneRemovesOnlyDoneTasksOfThatDay() = runBlocking {
+        repository.add(monday, "done")
+        repository.add(monday, "open")
+        repository.add(tuesday, "done elsewhere")
+        repository.setDone("t0", true)
+        repository.setDone("t2", true)
+
+        val deleted = repository.deleteDone(monday)
+
+        assertEquals(listOf("t0"), deleted)
+        val week = repository.observeWeek(monday).first()
+        assertEquals(listOf("open"), week[monday]!!.map { it.title })
+        assertEquals(listOf("done elsewhere"), week[tuesday]!!.map { it.title })
+    }
+
+    @Test
+    fun deleteDoneInOtherAndRestore() = runBlocking {
+        repository.add(null, "first")
+        repository.add(null, "second")
+        repository.add(null, "open")
+        repository.setDone("t0", true)
+        repository.setDone("t1", true)
+
+        val deleted = repository.deleteDone(null)
+        assertEquals(listOf("open"), repository.observeSomeday().first().map { it.title })
+
+        deleted.forEach { repository.restore(it) }
+        assertEquals(listOf("first", "second", "open"), repository.observeSomeday().first().map { it.title })
+    }
 }

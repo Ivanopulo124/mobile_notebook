@@ -9,7 +9,7 @@ composeBom = "2026.09.00"
 room = "2.8.5"
 datastore = "1.2.1"
 junit = "4.13.2"
-playServicesAuth = "21.6.0"
+yandexAuthSdk = "3.3.0"
 work = "2.11.2"
 coroutines = "1.10.2"
 serialization = "1.11.0"
@@ -32,8 +32,7 @@ androidx-datastore-preferences = { module = "androidx.datastore:datastore-prefer
 junit = { module = "junit:junit", version.ref = "junit" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
-play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
-kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutines" }
+yandex-authsdk = { module = "com.yandex.android:authsdk", version.ref = "yandexAuthSdk" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 
 [plugins]

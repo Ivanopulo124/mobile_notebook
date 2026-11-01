@@ -1,7 +1,5 @@
 package com.ivanopulo.planner.sync
 
-import android.app.PendingIntent
-import android.content.Intent
 import android.util.Log
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -11,7 +9,6 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.google.android.gms.common.api.ApiException
 import com.ivanopulo.planner.data.SettingsRepository
 import com.ivanopulo.planner.data.SyncError
 import kotlinx.coroutines.CancellationException
@@ -30,6 +27,7 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.toJavaDuration
 
 data class SyncStatus(
+    val provider: SyncProvider?,
     val account: String?,
     val lastSyncAt: Long?,
     val lastError: SyncError?,
@@ -39,7 +37,9 @@ data class SyncStatus(
 enum class SyncOutcome { SUCCESS, SKIPPED, RETRY, FAILED }
 
 class SyncManager(
-    private val auth: GoogleAuth,
+    private val dropbox: DropboxAuth,
+    private val yandex: YandexAuth,
+    private val secrets: SyncSecrets,
     private val store: SyncStore,
     private val settings: SettingsRepository,
     private val workManager: WorkManager,
@@ -48,11 +48,14 @@ class SyncManager(
 ) {
     private val mutex = Mutex()
 
+    val availableProviders: List<SyncProvider> = SyncProvider.entries.filter { auth(it).isConfigured }
+
     val status: Flow<SyncStatus> = combine(
         settings.syncPrefs,
         workManager.getWorkInfosForUniqueWorkFlow(WORK_ONE_TIME),
     ) { prefs, works ->
         SyncStatus(
+            provider = prefs.provider,
             account = prefs.account,
             lastSyncAt = prefs.lastSyncAt,
             lastError = prefs.lastError,
@@ -82,36 +85,38 @@ class SyncManager(
         }
     }
 
-    /** Returns the consent screen to launch, or null when access was already granted. */
-    suspend fun beginSignIn(): PendingIntent? {
-        val result = auth.authorize()
-        if (result.hasResolution()) return result.pendingIntent
-        completeSignIn(result.accessToken)
-        return null
+    /** The consent page to open in the browser; it redirects back to [finishDropboxSignIn]. */
+    suspend fun dropboxAuthorizationUrl(): String = dropbox.authorizationUrl()
+
+    suspend fun finishDropboxSignIn(code: String?, state: String?) {
+        dropbox.finishSignIn(code, state)?.let { completeSignIn(SyncProvider.DROPBOX, it) }
     }
 
-    suspend fun finishSignIn(data: Intent?) {
-        completeSignIn(auth.resultFromIntent(data).accessToken)
+    suspend fun finishYandexSignIn(token: String) {
+        completeSignIn(SyncProvider.YANDEX, yandex.finishSignIn(token))
     }
 
     suspend fun signOut() {
-        val account = settings.syncPrefs.first().account
+        val provider = settings.syncPrefs.first().provider
         workManager.cancelUniqueWork(WORK_ONE_TIME)
         workManager.cancelUniqueWork(WORK_PERIODIC)
         settings.clearSync()
-        if (account != null) {
+        if (provider != null) {
             try {
-                auth.revoke(account)
-            } catch (e: ApiException) {
-                Log.w(TAG, "Revoking Drive access failed", e)
+                auth(provider).signOut()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "Revoking cloud access failed", e)
             }
         }
+        secrets.clear()
     }
 
     suspend fun performSync(): SyncOutcome = mutex.withLock {
-        val account = settings.syncPrefs.first().account ?: return SyncOutcome.SKIPPED
+        val provider = settings.syncPrefs.first().provider ?: return SyncOutcome.SKIPPED
         try {
-            syncWithFreshToken(account)
+            syncWith(auth(provider))
             settings.recordSyncSuccess(clock())
             SyncOutcome.SUCCESS
         } catch (e: CancellationException) {
@@ -124,28 +129,31 @@ class SyncManager(
         }
     }
 
-    private suspend fun completeSignIn(accessToken: String?) {
-        val token = accessToken ?: throw NotAuthorizedException()
-        settings.setSyncAccount(DriveRemoteStore(token).accountEmail())
+    private fun auth(provider: SyncProvider): CloudAuth = when (provider) {
+        SyncProvider.DROPBOX -> dropbox
+        SyncProvider.YANDEX -> yandex
+    }
+
+    private suspend fun completeSignIn(provider: SyncProvider, account: String) {
+        settings.setSyncAccount(provider, account)
         requestSync()
         schedulePeriodicSync()
     }
 
-    private suspend fun syncWithFreshToken(account: String) {
-        val token = auth.accessToken(account)
+    private suspend fun syncWith(auth: CloudAuth) {
         try {
-            SyncEngine(store, DriveRemoteStore(token)).sync()
-        } catch (e: DriveAuthException) {
+            SyncEngine(store, auth.remoteStore(auth.accessToken())).sync()
+        } catch (e: RemoteAuthException) {
             // The cached token was revoked or expired early: drop it and try once with a new one.
-            auth.clearToken(token)
-            SyncEngine(store, DriveRemoteStore(auth.accessToken(account))).sync()
+            if (!auth.invalidateAccessToken()) throw e
+            SyncEngine(store, auth.remoteStore(auth.accessToken())).sync()
         }
     }
 
     private fun classify(e: Exception): Pair<SyncError, SyncOutcome> = when (e) {
-        is NotAuthorizedException, is DriveAuthException, is ApiException -> SyncError.AUTH to SyncOutcome.FAILED
+        is NotAuthorizedException, is RemoteAuthException -> SyncError.AUTH to SyncOutcome.FAILED
         is UnsupportedSyncFormatException, is SerializationException -> SyncError.FORMAT to SyncOutcome.FAILED
-        is DriveHttpException ->
+        is RemoteHttpException ->
             if (e.code == 429 || e.code >= 500) SyncError.NETWORK to SyncOutcome.RETRY
             else SyncError.OTHER to SyncOutcome.FAILED
         is IOException -> SyncError.NETWORK to SyncOutcome.RETRY

@@ -19,6 +19,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE id = :id")
     suspend fun get(id: String): TaskEntity?
 
+    @Query("SELECT id FROM tasks WHERE deleted = 0 AND done = 1 AND date IS :date")
+    suspend fun doneIds(date: String?): List<String>
+
     @Query("SELECT COALESCE(MAX(position), -1) + 1 FROM tasks WHERE deleted = 0 AND date IS :date")
     suspend fun nextPosition(date: String?): Int
 

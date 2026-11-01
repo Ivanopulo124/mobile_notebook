@@ -23,6 +23,9 @@ class FakeTaskDao : TaskDao {
 
     override suspend fun get(id: String): TaskEntity? = rows.value[id]
 
+    override suspend fun doneIds(date: String?): List<String> =
+        rows.value.values.filter { !it.deleted && it.done && it.date == date }.map { it.id }
+
     override suspend fun nextPosition(date: String?): Int =
         (rows.value.values.filter { !it.deleted && it.date == date }.maxOfOrNull { it.position } ?: -1) + 1
 

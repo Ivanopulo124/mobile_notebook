@@ -35,8 +35,9 @@ class WeekViewModel(private val tasks: TaskRepository) : ViewModel(), TaskAction
     private val _datePickerTask = MutableStateFlow<Task?>(null)
     val datePickerTask: StateFlow<Task?> = _datePickerTask.asStateFlow()
 
-    private val _deletions = Channel<Task>(Channel.BUFFERED)
-    val deletions: Flow<Task> = _deletions.receiveAsFlow()
+    // Ids of the tasks removed by one user action, for the undo snackbar.
+    private val _deletions = Channel<List<String>>(Channel.BUFFERED)
+    val deletions: Flow<List<String>> = _deletions.receiveAsFlow()
 
     val someday: StateFlow<List<Task>> = tasks.observeSomeday()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -104,11 +105,18 @@ class WeekViewModel(private val tasks: TaskRepository) : ViewModel(), TaskAction
 
     override fun delete(task: Task) {
         viewModelScope.launch { tasks.delete(task.id) }
-        _deletions.trySend(task)
+        _deletions.trySend(listOf(task.id))
     }
 
-    fun restore(task: Task) {
-        viewModelScope.launch { tasks.restore(task.id) }
+    override fun clearDone(date: LocalDate?) {
+        viewModelScope.launch {
+            val ids = tasks.deleteDone(date)
+            if (ids.isNotEmpty()) _deletions.send(ids)
+        }
+    }
+
+    fun restore(ids: List<String>) {
+        viewModelScope.launch { ids.forEach { tasks.restore(it) } }
     }
 
     companion object {

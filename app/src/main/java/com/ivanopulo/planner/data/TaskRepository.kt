@@ -53,6 +53,13 @@ class TaskRepository(
 
     suspend fun delete(id: String) = update(id) { copy(deleted = true) }
 
+    /** Deletes the done tasks of [date] (null is the Other list) and returns their ids for undo. */
+    suspend fun deleteDone(date: LocalDate?): List<String> {
+        val ids = dao.doneIds(date?.toString())
+        ids.forEach { delete(it) }
+        return ids
+    }
+
     suspend fun restore(id: String) = update(id) { copy(deleted = false) }
 
     private suspend fun update(id: String, change: TaskEntity.() -> TaskEntity) {

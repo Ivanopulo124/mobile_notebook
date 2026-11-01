@@ -23,13 +23,20 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -38,11 +45,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ivanopulo.planner.R
 import com.ivanopulo.planner.domain.Task
 import com.ivanopulo.planner.domain.Weeks
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import kotlin.math.roundToInt
 
 @Composable
 fun WeekScreen(
+    startCount: Int,
     onOpenSettings: () -> Unit,
     viewModel: WeekViewModel = viewModel(factory = WeekViewModel.Factory),
 ) {
@@ -59,18 +70,35 @@ fun WeekScreen(
 
     BackHandler(enabled = editing != null) { focusManager.clearFocus() }
 
-    val deletedMessage = stringResource(R.string.task_deleted)
+    // The current week scrolls to today when the app comes to the foreground and on the Today button.
+    // Saved state keeps a return from Settings from counting as a new start.
+    var todayScrollRequest by rememberSaveable { mutableIntStateOf(0) }
+    var handledTodayScroll by rememberSaveable { mutableIntStateOf(0) }
+    var handledStart by rememberSaveable { mutableIntStateOf(0) }
+    LaunchedEffect(startCount) {
+        if (startCount != handledStart) {
+            handledStart = startCount
+            todayScrollRequest++
+        }
+    }
+
+    val resources = LocalResources.current
     val undoLabel = stringResource(R.string.undo)
     LaunchedEffect(Unit) {
-        viewModel.deletions.collect { task ->
+        viewModel.deletions.collect { ids ->
             snackbarHostState.currentSnackbarData?.dismiss()
+            val message = if (ids.size == 1) {
+                resources.getString(R.string.task_deleted)
+            } else {
+                resources.getQuantityString(R.plurals.tasks_deleted, ids.size, ids.size)
+            }
             launch {
                 val result = snackbarHostState.showSnackbar(
-                    message = deletedMessage,
+                    message = message,
                     actionLabel = undoLabel,
                     duration = SnackbarDuration.Short,
                 )
-                if (result == SnackbarResult.ActionPerformed) viewModel.restore(task)
+                if (result == SnackbarResult.ActionPerformed) viewModel.restore(ids)
             }
         }
     }
@@ -89,7 +117,12 @@ fun WeekScreen(
             WeekHeader(
                 monday = visibleMonday,
                 showToday = pagerState.currentPage != todayPage,
-                onToday = { scope.launch { pagerState.animateScrollToPage(todayPage) } },
+                onToday = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(todayPage)
+                        todayScrollRequest++
+                    }
+                },
                 onSettings = onOpenSettings,
             )
             BoxWithConstraints {
@@ -97,12 +130,16 @@ fun WeekScreen(
                 HorizontalPager(state = pagerState, beyondViewportPageCount = 1) { page ->
                     val monday = Weeks.mondayForPage(page, anchor)
                     val tasks by remember(monday) { viewModel.week(monday) }
-                        .collectAsStateWithLifecycle(emptyMap())
+                        .collectAsStateWithLifecycle(null)
+                    val pendingTodayScroll = todayScrollRequest
+                        .takeIf { page == todayPage && it != handledTodayScroll }
                     WeekPage(
                         monday = monday,
                         today = today,
                         columns = columns,
                         tasksByDay = tasks,
+                        scrollToTodayRequest = pendingTodayScroll,
+                        onScrolledToToday = { handledTodayScroll = it },
                         someday = someday,
                         editing = editing,
                         isCurrentPage = page == pagerState.currentPage,
@@ -135,7 +172,9 @@ private fun WeekPage(
     monday: LocalDate,
     today: LocalDate,
     columns: Int,
-    tasksByDay: Map<LocalDate, List<Task>>,
+    tasksByDay: Map<LocalDate, List<Task>>?,
+    scrollToTodayRequest: Int?,
+    onScrolledToToday: (Int) -> Unit,
     someday: List<Task>,
     editing: EditTarget?,
     isCurrentPage: Boolean,
@@ -145,20 +184,39 @@ private fun WeekPage(
     val minLines = if (columns > 1) 5 else 3
     val cells = Weeks.daysOf(monday).map(Cell::Day) + Cell.Someday
     fun tasksOf(cell: Cell) = when (cell) {
-        is Cell.Day -> tasksByDay[cell.date].orEmpty()
+        is Cell.Day -> tasksByDay?.get(cell.date).orEmpty()
         Cell.Someday -> someday
+    }
+    val scrollState = rememberScrollState()
+    var todayRowTop by remember { mutableStateOf<Int?>(null) }
+    // Rows above today grow once the week's tasks load, so the offset only counts after that.
+    val loaded by rememberUpdatedState(tasksByDay != null)
+    if (scrollToTodayRequest != null) {
+        LaunchedEffect(scrollToTodayRequest) {
+            val target = snapshotFlow { todayRowTop.takeIf { loaded } }.filterNotNull().first()
+            scrollState.animateScrollTo(target)
+            onScrolledToToday(scrollToTodayRequest)
+        }
     }
     Column(
         Modifier
             .fillMaxSize()
             .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
             .padding(start = 20.dp, end = 20.dp, bottom = 32.dp)
     ) {
         cells.chunked(columns).forEach { row ->
             // Cells sharing a row get the same number of lines so the ruling stays aligned.
             val lines = maxOf(minLines, row.maxOf { tasksOf(it).size + 1 })
-            Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+            val hasToday = row.any { it == Cell.Day(today) }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                modifier = if (hasToday) {
+                    Modifier.onGloballyPositioned { todayRowTop = it.positionInParent().y.roundToInt() }
+                } else {
+                    Modifier
+                },
+            ) {
                 row.forEach { cell ->
                     val modifier = Modifier.weight(1f)
                     when (cell) {

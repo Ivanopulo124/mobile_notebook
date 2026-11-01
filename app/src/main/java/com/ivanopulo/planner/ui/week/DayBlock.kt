@@ -1,17 +1,26 @@
 package com.ivanopulo.planner.ui.week
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,6 +52,7 @@ fun DayBlock(
                 color = accent,
             )
             Spacer(Modifier.weight(1f))
+            if (tasks.any { it.done }) ClearDoneButton { actions.clearDone(date) }
             Text(
                 text = date.dayOfWeek.shortLabel(locale),
                 style = MaterialTheme.typography.titleLarge,
@@ -68,8 +78,27 @@ fun SomedayBlock(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
             )
+            Spacer(Modifier.weight(1f))
+            if (tasks.any { it.done }) ClearDoneButton { actions.clearDone(null) }
         }
     }
+}
+
+// Smaller than the header text so the header height, and the ruling of neighbouring blocks, stays the same.
+@Composable
+private fun RowScope.ClearDoneButton(onClick: () -> Unit) {
+    Icon(
+        painter = painterResource(R.drawable.ic_clear_done),
+        contentDescription = stringResource(R.string.cd_clear_done),
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier
+            .align(Alignment.CenterVertically)
+            .padding(end = 8.dp)
+            .clip(CircleShape)
+            .clickable(onClick = onClick)
+            .padding(2.dp)
+            .size(22.dp),
+    )
 }
 
 // Drawn slightly outside the block so today's text stays aligned with the other days.
